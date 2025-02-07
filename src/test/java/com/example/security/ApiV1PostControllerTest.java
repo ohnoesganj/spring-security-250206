@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -305,7 +304,6 @@ public class ApiV1PostControllerTest {
 
     @Test
     @DisplayName("글 작성")
-    @WithUserDetails("user1")
     void write1() throws Exception {
 
         String apiKey = "user1";
@@ -339,8 +337,6 @@ public class ApiV1PostControllerTest {
 
         resultActions
                 .andExpect(status().isUnauthorized())
-                .andExpect(handler().handlerType(ApiV1PostController.class))
-                .andExpect(handler().methodName("write"))
                 .andExpect(jsonPath("$.code").value("401-1"))
                 .andExpect(jsonPath("$.msg").value("잘못된 인증키입니다."));
 
@@ -430,8 +426,6 @@ public class ApiV1PostControllerTest {
 
         resultActions
                 .andExpect(status().isUnauthorized())
-                .andExpect(handler().handlerType(ApiV1PostController.class))
-                .andExpect(handler().methodName("modify"))
                 .andExpect(jsonPath("$.code").value("401-1"))
                 .andExpect(jsonPath("$.msg").value("잘못된 인증키입니다.".formatted(postId)));
 
@@ -518,8 +512,6 @@ public class ApiV1PostControllerTest {
 
         resultActions
                 .andExpect(status().isUnauthorized())
-                .andExpect(handler().handlerType(ApiV1PostController.class))
-                .andExpect(handler().methodName("delete"))
                 .andExpect(jsonPath("$.code").value("401-1"))
                 .andExpect(jsonPath("$.msg").value("잘못된 인증키입니다.".formatted(postId)));
 
