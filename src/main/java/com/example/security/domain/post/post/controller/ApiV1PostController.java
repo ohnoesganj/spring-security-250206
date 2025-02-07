@@ -1,6 +1,7 @@
 package com.example.security.domain.post.post.controller;
 
 import com.example.security.domain.member.member.entity.Member;
+import com.example.security.domain.member.member.service.MemberService;
 import com.example.security.domain.post.post.dto.PageDto;
 import com.example.security.domain.post.post.dto.PostWithContentDto;
 import com.example.security.domain.post.post.entity.Post;
@@ -8,10 +9,13 @@ import com.example.security.domain.post.post.service.PostService;
 import com.example.security.global.Rq;
 import com.example.security.global.dto.RsData;
 import com.example.security.global.exception.ServiceException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,8 +25,10 @@ public class ApiV1PostController {
 
     private final PostService postService;
     private final Rq rq;
+    private final MemberService memberService;
 
     @GetMapping
+    @Transactional
     public RsData<PageDto> getItems(@RequestParam(defaultValue = "1") int page,
                                     @RequestParam(defaultValue = "3") int pageSize,
                                     @RequestParam(defaultValue = "title") String keywordType,
@@ -82,9 +88,17 @@ public class ApiV1PostController {
     }
 
     @PostMapping
-    public RsData<PostWithContentDto> write(@RequestBody @Valid WriteReqBody reqBody) {
+    @Transactional
+    public RsData<PostWithContentDto> write(@RequestBody @Valid WriteReqBody reqBody,
+                                            @AuthenticationPrincipal UserDetails principal) {
 
-        Member actor = rq.getAuthenticatedActor();
+        if (principal == null) {
+            throw new ServiceException("401-1", "로그인이 필요합니다.");
+        }
+
+        String username = principal.getUsername();
+        Member actor = memberService.findByUsername(username).get();
+
         Post post = postService.write(actor, reqBody.title(), reqBody.content(), reqBody.published(), reqBody.listed());
 
         return new RsData<>(

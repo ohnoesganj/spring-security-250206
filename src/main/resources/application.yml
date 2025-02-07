@@ -11,7 +11,7 @@ spring:
 
   datasource:
     url: jdbc:h2:./db_dev;MODE=MySQL
-    username: sa
+    username: root
     password:
     driver-class-name: org.h2.Driver
 
